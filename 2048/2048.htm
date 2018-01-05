@@ -1,0 +1,456 @@
+<html>
+<title>2048</title>
+<head>
+<style>
+#score{position:absolute;width:200px;}
+.Back{position:absolute;top:50%;left:50%;margin:-250px 0 0 -250px;border-style:solid;border-width:1px;border-color:#000000;width:500px;height:500px;}
+.Ge{position:relative;border-style:solid;border-width:10px;border-color:#F5F5F5;background:#ffffff;width:105px;height:105px;}
+.nItem1{display:inline;opacity:1;z-index:999;position:absolute;width:105px;height:105px;background:#FAFAD2;text-align:center;line-height:105px;font-size:60px;}
+.nItem2{display:inline;opacity:1;z-index:999;position:absolute;width:105px;height:105px;background:#FFFF00;text-align:center;line-height:105px;font-size:60px;}
+.nItem3{display:inline;opacity:1;z-index:999;position:absolute;width:105px;height:105px;background:#FFD700;text-align:center;line-height:105px;font-size:60px;}
+.nItem4{display:inline;opacity:1;z-index:999;position:absolute;width:105px;height:105px;background:#DAA520;text-align:center;line-height:105px;font-size:60px;}
+.nItem5{display:inline;opacity:1;z-index:999;position:absolute;width:105px;height:105px;background:#FF4500;text-align:center;line-height:105px;font-size:60px;}
+.nItem6{display:inline;opacity:1;z-index:999;position:absolute;width:105px;height:105px;background:#90EE90;text-align:center;line-height:105px;font-size:60px;}
+.nItem7{display:inline;opacity:1;z-index:999;position:absolute;width:105px;height:105px;background:#40E0D0;text-align:center;line-height:105px;font-size:60px;}
+.nItem8{display:inline;opacity:1;z-index:999;position:absolute;width:105px;height:105px;background:#1E90FF;text-align:center;line-height:105px;font-size:60px;}
+.nItem9{display:inline;opacity:1;z-index:999;position:absolute;width:105px;height:105px;background:#DA70D6;text-align:center;line-height:105px;font-size:60px;}
+.nItem10{display:inline;opacity:1;z-index:999;position:absolute;width:105px;height:105px;background:#7B68EE;text-align:center;line-height:105px;font-size:60px;}
+
+@-webkit-keyframes 'index'{
+
+   0%{
+  left:0%;
+}
+   50%{
+ left:50%; 
+   }
+   100%{
+ left:100%;
+}
+}
+</style>
+</head>
+<body>
+<p id="a">"2048 Enter键开始 上下左右移动"</p>
+<!--<canvas id="myCanvas" width="300" height="300" style="border:1px solid #d3d3d3;">
+您的浏览器不支持 HTML5 canvas 标签。</canvas>!-->
+<div id="score">分数:</div>
+<div id="back" class="Back">
+
+<div id="ge0" class="Ge" style="float:left;top:0px;"></div>
+<div id="ge1" class="Ge" style="float:left;"></div>
+<div id="ge2" class="Ge" style="float:left;"></div>
+<div id="ge3" class="Ge" style="float:left;"></div>
+
+<div id="ge4" class="Ge" style="float:left;"></div>
+<div id="ge5" class="Ge" style="float:left;"></div>
+<div id="ge6" class="Ge" style="float:left;"></div>
+<div id="ge7" class="Ge" style="float:left;"></div>
+
+<div id="ge8" class="Ge" style="float:left;"></div>
+<div id="ge9" class="Ge" style="float:left;"></div>
+<div id="ge10" class="Ge" style="float:left;"></div>
+<div id="ge11" class="Ge" style="float:left;"></div>
+
+<div id="ge12" class="Ge" style="float:left;"></div>
+<div id="ge13" class="Ge" style="float:left;"></div>
+<div id="ge14" class="Ge" style="float:left;"></div>
+<div id="ge15" class="Ge" style="float:left;"></div>
+</div>
+
+<script type="text/javascript" src="jquery.js"></script>
+<script>
+var newI,newJ,N,ifchange=0;
+var x=document.getElementById("a");
+var score=0;
+
+window.onload=function(){
+init();
+$('#score').css('left',$('#back').position().left+125);
+$('#score').css('top',$('#back').position().top-$('#score').height()-250-20);
+scoreUpdate();
+};
+
+function CreateNewItem(n){
+var div=document.createElement("DIV");
+div.id='div'+n;
+document.body.appendChild(div);
+document.getElementById("ge"+n).appendChild(div);
+return div;
+}
+
+function SetStyle(div,i,j)
+{
+div.setAttribute('class','nItem'+map[i][j]);
+var t=document.createTextNode(Math.pow(2,map[i][j]));
+div.appendChild(t);
+}
+
+function scoreUpdate()
+{
+$('#score').text("分数:"+score);
+}
+
+function scoreAdd(i,j)
+{
+return 5*map[i][j];
+}
+
+function if_full(){
+//var x=document.getElementById("a");
+var n=1;
+for(var i=0;i<4;i++)
+{
+for(var j=0;j<4;j++)
+{
+if(map[i][j]==0)
+{
+n=0;
+}
+}
+}
+//x.innerHTML=n;
+return n;
+}
+
+function if_fail(){
+var n=1;
+for(var i=0;i<4;i++)
+{
+ for(var j=0;j<4;j++)
+ {
+  if(map[i][j]>-1)
+  {
+  if(j<3&&(map[i][j]==map[i][j+1]||map[i][j+1]==0))
+  n=0;
+  else if(j>0&&(map[i][j]==map[i][j-1]||map[i][j-1]==0))
+  n=0;
+  else if(i>0&&(map[i][j]==map[i-1][j]||map[i-1][j]==0))
+  n=0;
+  else if(i<3&&(map[i][j]==map[i+1][j]||map[i+1][j]==0))
+  n=0;
+  }
+ }
+}
+return n;
+}
+
+
+function rand_num(){
+var num=Math.floor(Math.random()*3);
+var i,j;
+
+if(if_full())
+{
+//alert('GameOver');
+return 0;
+}
+
+do
+{
+i=Math.floor(Math.random()*4);
+j=Math.floor(Math.random()*4);
+}while(map[i][j]!=0)
+newI=i;
+newJ=j;
+
+if(num==0||num==1)
+{
+map[i][j]=1;
+var div=CreateNewItem(j+i*4);
+SetStyle(div,i,j);
+//$("#div"+(j+i*4)).hide();
+$("#div"+(j+i*4)).css('opacity',0);
+//$('#div'+(j+i*4)).fadeIn('slow');
+$("#div"+(j+i*4)).animate({opacity:'1'},'fast');
+}
+else
+{
+map[i][j]=2;
+var div=CreateNewItem(j+i*4);
+SetStyle(div,i,j);
+//$("#div"+(j+i*4)).hide();
+$("#div"+(j+i*4)).css('opacity',0);
+//$('#div'+(j+i*4)).fadeIn('slow');
+$("#div"+(j+i*4)).animate({opacity:'1'},'fast');
+}
+N=map[i][j];
+}
+
+function init(){
+score=0;
+for(var i1=0;i1<4;i1++)
+{
+	for(var j1=0;j1<4;j1++)
+        map[i1][j1]=0;
+}
+var i,j,n=0;
+do
+{
+i=Math.floor(Math.random()*4);
+j=Math.floor(Math.random()*4);
+if(map[i][j]==0)
+{
+map[i][j]=1;
+var div=CreateNewItem(j+i*4);
+SetStyle(div,i,j);
+n++;
+}
+else continue;
+}while(n!=2)
+}
+
+
+function ItemUpdate(){
+$(".Ge").children("div").stop(false,true);
+$(".Ge").children("div").remove();
+		for(var i=0;i<4;i++)
+		{
+			for(var j=0;j<4;j++)
+			{   
+                if(map[i][j]!=0){           
+		var div=CreateNewItem(j+i*4);SetStyle(div,i,j);}
+			}
+		}
+
+}
+
+	function left_hebing(){
+        var new0=map[0].concat();
+        var new1=map[1].concat();
+        var new2=map[2].concat();
+        var new3=map[3].concat();
+	for(var i=0;i<4;i++)
+	{
+	  for(var j=0;j<4;j++)
+	  {
+		  if(j==3)
+		  break;
+		  if(map[i][j]==map[i][j+1]&&map[i][j]!=0)
+		  {
+                   score+=scoreAdd(i,j); 
+		   map[i][j]++;
+		   map[i][j+1]=0;
+                           
+                   $('#div'+((j+1)+i*4)).animate({left:'-='+125+'px'},'fast',function(){$(this).remove();
+if(!$(".Ge").children("div").is(":animated")){ItemUpdate();if(!ifchange)
+{rand_num();}}});
+		  }
+		  if(map[i][j]==0)
+		  {
+		   for(var k=j;map[i][k]==0;k++)
+		   if(k==3)
+		   break;
+                   if(map[i][k]==0)
+                   continue;
+                   map[i][j]=map[i][k];
+		   map[i][k]=0;            
+                   $('#div'+((k)+i*4)).animate({left:'-='+(k-j)*125+'px'},'fast',function(){$(this).remove();
+if(!$(".Ge").children("div").is(":animated")){ItemUpdate();if(!ifchange)
+{rand_num();}}});
+                   }
+                  
+		 
+	  }
+	 }
+        if(new0.toString()==map[0].toString()&&new1.toString() == map[1].toString()&&new2.toString() == map[2].toString()&&new3.toString() == map[3].toString())
+	return 1;
+        //ItemUpdate();
+        }
+	
+	function right_hebing(){
+ var new0=map[0].concat();
+        var new1=map[1].concat();
+        var new2=map[2].concat();
+        var new3=map[3].concat();
+	for(var i=0;i<4;i++)
+	{
+	  for(var j=3;j>-1;j--)
+	  {
+		  if(j==0)
+		  break;
+		  if(map[i][j]==map[i][j-1]&&map[i][j]!=0)
+		  {
+score+=scoreAdd(i,j);
+		   map[i][j]++;
+		   map[i][j-1]=0;
+$('#div'+((j-1)+i*4)).animate({left:'+='+125+'px'},'fast',function(){$(this).remove();
+if(!$(".Ge").children("div").is(":animated")){ItemUpdate();if(!ifchange)
+{rand_num();}}});
+		  }
+		  if(map[i][j]==0)
+		  {
+		   for(var k=j;map[i][k]==0;k--)
+	           if(k==0)
+                   break;
+                   if(map[i][k]==0)
+                   continue;
+		   map[i][j]=map[i][k];
+		   map[i][k]=0;
+$('#div'+((k)+i*4)).animate({left:'+='+(j-k)*125+'px'},'fast',function(){$(this).remove();
+if(!$(".Ge").children("div").is(":animated")){ItemUpdate();if(!ifchange)
+{rand_num();}}});
+		  }
+		 
+	  }
+	 }
+ if(new0.toString()==map[0].toString()&&new1.toString() == map[1].toString()&&new2.toString() == map[2].toString()&&new3.toString() == map[3].toString())
+	return 1;
+//ItemUpdate();
+	}
+
+function up_hebing(){
+  var new0=map[0].concat();
+        var new1=map[1].concat();
+        var new2=map[2].concat();
+        var new3=map[3].concat();
+	for(var j=0;j<4;j++)
+	{
+	  for(var i=0;i<4;i++)
+	  {
+		  if(i==3)
+		  break;
+		  if(map[i][j]==map[i+1][j]&&map[i][j]!=0)
+		  {
+score+=scoreAdd(i,j);
+		   map[i][j]++;
+		   map[i+1][j]=0;
+                   $('#div'+((j)+(i+1)*4)).animate({top:'-='+125+'px'},'fast',function(){$(this).remove();
+if(!$(".Ge").children("div").is(":animated")){ItemUpdate();if(!ifchange)
+{rand_num();}}});
+		  }
+		  if(map[i][j]==0)
+		  {
+		   for(var k=i;map[k][j]==0;k++)
+		   if(k==3)
+		   break;
+                   if(map[k][j]==0)
+                   continue;
+		   map[i][j]=map[k][j];
+		   map[k][j]=0;
+                   $('#div'+((j)+k*4)).animate({top:'-='+(k-i)*125+'px'},'fast',function(){$(this).remove();if(!$(".Ge").children("div").is(":animated")){ItemUpdate();if(!ifchange)
+{rand_num();}}});
+		  }
+		 
+	  }
+	 }
+ if(new0.toString()==map[0].toString()&&new1.toString() == map[1].toString()&&new2.toString() == map[2].toString()&&new3.toString() == map[3].toString())
+	return 1;
+//ItemUpdate();
+	}
+	
+function down_hebing(){
+ var new0=map[0].concat();
+        var new1=map[1].concat();
+        var new2=map[2].concat();
+        var new3=map[3].concat();
+	for(var j=0;j<4;j++)
+	{
+	  for(var i=3;i>-1;i--)
+	  {
+		  if(i==0)
+		  break;
+		  if(map[i][j]==map[i-1][j]&&map[i][j]!=0)
+		  {
+score+=scoreAdd(i,j);
+		   map[i][j]++;
+		   map[i-1][j]=0;
+                   $('#div'+((j)+(i-1)*4)).animate({top:'+='+125+'px'},'fast',function(){$(this).remove();
+if(!$(".Ge").children("div").is(":animated")){ItemUpdate();if(!ifchange)
+{rand_num();}}});
+		  }
+		  if(map[i][j]==0)
+		  {
+		   for(var k=i;map[k][j]==0;k--)
+	          if(k==0)
+		   break;
+                   if(map[k][j]==0)
+                   continue;
+		   map[i][j]=map[k][j];
+		   map[k][j]=0;
+                   $('#div'+((j)+k*4)).animate({top:'+='+(i-k)*125+'px'},'fast',function(){$(this).remove();if(!$(".Ge").children("div").is(":animated")){ItemUpdate();if(!ifchange)
+{rand_num();}}});
+		  }
+		 
+	  }
+	 }
+ if(new0.toString()==map[0].toString()&&new1.toString() == map[1].toString()&&new2.toString() == map[2].toString()&&new3.toString() == map[3].toString())
+	return 1;
+//ItemUpdate();
+	}
+
+var map=[0,0,0,0];
+	map[0]=[1,1,0,0];
+	map[1]=[5,6,0,0];
+	map[2]=[9,2,0,0];
+	map[3]=[1,0,0,0];
+
+document.onkeydown=function(event){
+var e = event || window.event || arguments.callee.caller.arguments[0];
+
+ItemUpdate();
+if(e && e.keyCode==13){ // 按 Enter 
+//要做的事情
+        init();
+        scoreUpdate();
+        ItemUpdate();
+}
+if(e && e.keyCode==113){ // 按 F2 
+//要做的事情
+} 
+
+if(e && e.keyCode==37){ // 左 键
+if(if_fail())
+{
+alert('GameOver');
+return 0;
+}
+score+=2;
+scoreUpdate();
+ifchange=left_hebing();
+scoreUpdate();
+//要做的事情
+}
+if(e && e.keyCode==38){ // 上 键
+if(if_fail())
+{
+alert('GameOver');
+return 0;
+}
+score+=2;
+scoreUpdate();
+ifchange=up_hebing();
+scoreUpdate();
+}
+	
+if(e && e.keyCode==40){ // 下 键
+if(if_fail())
+{
+alert('GameOver');
+return 0;
+}
+score+=2;
+scoreUpdate();
+ifchange=down_hebing();
+scoreUpdate();
+//要做的事情
+}
+
+if(e && e.keyCode==39){ // 右 键
+if(if_fail())
+{
+alert('GameOver');
+return 0;
+}
+score+=2;
+scoreUpdate();
+ifchange=right_hebing();
+scoreUpdate();
+//要做的事情
+}
+}; 
+
+</script>
+
+</body>
+</html>
