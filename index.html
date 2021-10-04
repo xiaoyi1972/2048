@@ -1,0 +1,454 @@
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<title>2048</title>
+
+<head>
+    <style type="text/css">
+        html,
+        body {
+            background: #faf8ef;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            width: 62vmin;
+            height: 80vmin;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            align-items: center;
+        }
+
+        .score-container,
+        .best-container {
+            position: relative;
+            display: block;
+            background: #bbada0;
+            padding: 1vmin 3vmin;
+            font-size: 2.7vmin;
+            min-width: 4vmin;
+            height: 5vmin;
+            line-height: 8.5vmin;
+            border-radius: 3px;
+            color: white;
+            margin-top: 8px;
+            margin-left: 4px;
+            text-align: center;
+        }
+
+        .score-container:after,
+        .best-container:after {
+            position: absolute;
+            width: 100%;
+            top: 1vmin;
+            left: 0;
+            text-transform: uppercase;
+            font-size: 2.7vmin;
+            line-height: 2vmin;
+            text-align: center;
+            color: #eee4da;
+        }
+
+        .score-container:after {
+            content: '得分';
+        }
+
+        .best-container:after {
+            content: '最佳'''
+        }
+
+        .info {
+            display: flex;
+            align-self: flex-start;
+            justify-content: center;
+            flex-direction: column;
+            flex: 1 1 auto;
+            width: 100%;
+        }
+
+        .title {
+            font-size: 8vmin;
+        }
+
+        .game-intro {
+            bottom: 0;
+            font-size: 2.4vmin;
+        }
+
+        .restart-button {
+            position: relative;
+            background: #8f7a66;
+            border-radius: 3px;
+            padding: 0 3vmin;
+            text-decoration: none;
+            color: #f9f6f2;
+            height: 5vmin;
+            line-height: 5vmin;
+            font-size: 2.2vmin;
+            cursor: pointer;
+            display: block;
+            text-align: center;
+            flex-shrink: 0;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .restart-button:after {
+            content: "";
+            background: #fff;
+            position: absolute;
+            width: 10vmin;
+            height: 10vmin;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0;
+            margin: auto;
+            border-radius: 50%;
+            transform: scale(1.5);
+            transition: all 0.55s ease-out;
+        }
+
+        .restart-button:active:after {
+            transform: scale(0);
+            opacity: 1;
+            transition: 0s
+        }
+
+        .board {
+            width: 60vmin;
+            height: 60vmin;
+            border: 1vmin solid rgba(187, 173, 160, 1);
+            border-radius: 6px;
+            background: rgba(205, 193, 180, 1);
+            background-image:
+                linear-gradient(90deg,
+                    rgba(187, 173, 160, 1) 0vmin, rgba(187, 173, 160, 1) 1vmin,
+                    transparent 0vmin, transparent 14vmin,
+                    rgba(187, 173, 160, 1) 0vmin, rgba(187, 173, 160, 1) 15vmin),
+                linear-gradient(0deg,
+                    rgba(187, 173, 160, 1) 0vmin, rgba(187, 173, 160, 1) 1vmin,
+                    transparent 0vmin, transparent 14vmin,
+                    rgba(187, 173, 160, 1) 0vmin, rgba(187, 173, 160, 1) 15vmin);
+            background-size: 15vmin 15vmin;
+            background-position: 0vmin 0vmin;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .grid {
+            position: absolute;
+            width: 15vmin;
+            height: 15vmin;
+            box-sizing: border-box;
+            border: 1vmin solid transparent;
+            background-clip: content-box;
+            border-radius: 3px;
+        }
+
+        .grid span {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8vmin;
+        }
+    </style>
+</head>
+
+<body>
+    <div class='container'>
+        <div class="info">
+            <div style="display:flex;flex-direction: row;width:100%;">
+                <span class="title">2048</span>
+                <div style='flex:auto'></div>
+                <div style='display:flex;flex-direction: row;height:100%;align-items: center;'>
+                    <div class="score-container">0</div>
+                    <div class="best-container">0</div>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction: row;width:100%;align-items: center;">
+                <div class="game-intro">合并图块，达成 <strong>2048!</strong><br><a href="javascript:void(0)"
+                        class="how-to-play-link">怎样玩 →</a></div>
+                <div style='flex:auto'></div>
+                <div class="restart-button">新游戏</div>
+            </div>
+        </div>
+        <div class='board'>
+        </div>
+    </div>
+    <script type="text/javascript">
+        const gridStyle = {
+            1: { text: '2', color: '#776e65', background: '#eee4da' },
+            2: { text: '4', color: '#776e65', background: '#eee1c9' },
+            3: { text: '8', color: '#f9f6f2', background: '#f3b27a' },
+            4: { text: '16', color: '#f9f6f2', background: '#f69664' },
+            5: { text: '32', color: '#f9f6f2', background: '#f77c5f' },
+            6: { text: '64', color: '#f9f6f2', background: '#f75f3b' },
+            7: { text: '128', color: '#f9f6f2', background: '#edd073' },
+            8: { text: '256', color: '#f9f6f2', background: '#edcc62' },
+            9: { text: '512', color: '#f9f6f2', background: '#edc950' },
+            10: { text: '1024', color: '#f9f6f2', background: '#edc53f' },
+            11: { text: '2048', color: '#f9f6f2', background: '#edc22e' }
+        }
+        const Rand = function (_seed = Math.floor(new Date().getMilliseconds())) {
+            this.seed = _seed
+        }
+
+        Rand.prototype.random = function (min = 0, max = min + 1) {
+            this.seed = (this.seed * 9301 + 49297) % 233280
+            return min + this.seed / 233280.0 * (max - min)
+        }
+
+        const Matrix = function (row, col) {
+            this.row = row
+            this.col = col
+            this.count = row * col
+            this.data = new Array(this.count).fill(0)
+        }
+        Matrix.prototype.test = function () {
+            this.set(0, 1, 2)
+            this.set(1, 2, 1)
+        }
+        Matrix.prototype.check = function (row, col) {
+            return this.data[this.index(row, col)] > 0
+        }
+        Matrix.prototype.print = function () {
+            const patt = new RegExp(`((?:\\d+\\s){${this.col - 1}}\\d+)\\s*`, 'g')
+            console.log(this.data.join(' ').replace(patt, '$1\n'))
+        }
+        Matrix.prototype.getPos = function (index) { return { row: Math.trunc(index / this.col), col: index % this.col } }
+        Matrix.prototype.index = function (row, col) { return row * this.col + col }
+        Matrix.prototype.set = function (row, col, value) { this.data[this.index(row, col)] = value }
+        Matrix.prototype.get = function (row, col, value) { return this.data[this.index(row, col)] }
+        Matrix.prototype.merge = function (dir = 4) {//1 up 2 down 3 left 4 right
+            let arr = []
+            const select = [1, -1][dir & 1], vertical = dir < 3, dis = vertical ? this.col : 1
+            for (let i = 0; i < this.row; i++) {
+                for (let j = (select > 0 ? (this.col - 1) * (vertical ? this.row : 1) : 0) + i * (vertical ? 1 : this.col),
+                    step = 0,
+                    limit = { upper: Math.max(j, j - select * dis * this.col) + (select > 0 ? 1 : 0), lower: Math.min(j, j - select * dis * this.col) + (select > 0 ? 1 : 0) };
+                    step < this.col; j -= select * dis, step++) {
+                    let cross = 0
+                    if (this.data[j] > 0) {
+                        for (let m = j + select * dis; m >= limit.lower && m < limit.upper; m += select * dis) {
+                            if (this.data[m]) {
+                                if (this.data[j] == this.data[m]) { //same grid
+                                    this.data[m] = this.data[j] + 1
+                                    this.data[j] = 0
+                                    arr.push({ from: this.getPos(j), to: this.getPos(m), value: this.data[m], type: 1 })
+                                    cross = 0
+                                }
+                                break
+                            }
+                            else cross += select * dis
+                        }
+                        if (cross != 0) { //have crossed
+                            this.data[j + cross] = this.data[j]
+                            this.data[j] = 0
+                            arr.push({ from: this.getPos(j), to: this.getPos(j + cross), value: this.data[j + cross], type: 2 })
+                        }
+                    }
+                }
+            }
+            return arr
+        }
+        const Game = function () {
+            this.randGen = new Rand()
+            this.matrix = new Matrix(4, 4)
+            this.items = new Array(this.matrix.count).fill(null)
+            this.generate()
+            this.info = {
+                score: { element: document.querySelector('.score-container'), m_value: 0 },
+                best: { element: document.querySelector('.best-container'), m_value: 0 },
+            }
+            Object.defineProperty(this.info.score, "value", {
+                get: function () { return this.m_value; }.bind(this.info.score),
+                set: function (v) { this.element.innerHTML = this.m_value = v }.bind(this.info.score)
+            })
+            Object.defineProperty(this.info.best, "value", {
+                get: function () { return this.m_value; }.bind(this.info.best),
+                set: function (v) { this.element.innerHTML = this.m_value = v }.bind(this.info.best)
+            })
+            this.update()
+        }
+        Game.prototype.update = function () {
+            this.info.score.value = 0
+        }
+        Game.prototype.restart = function () {
+            this.info.score.value = 0
+            this.clear()
+            this.randGen = new Rand()
+            this.matrix = new Matrix(4, 4)
+            this.items = new Array(this.matrix.count).fill(null)
+            this.generate()
+        }
+        Game.prototype.generate = function (count = 2) {
+            let sum = 0
+            for (let i = 0; i < this.matrix.row; i++)
+                for (let j = 0; j < this.matrix.col; j++) {
+                    if (this.matrix.check(i, j)) sum++
+                }
+            for (let i = 0; i < Math.min(count, this.matrix.row * this.matrix.col - sum); i++) {
+                let row, col
+                do {
+                    row = Math.trunc(this.randGen.random(0, 4))
+                    col = Math.trunc(this.randGen.random(0, 4))
+                } while (this.matrix.check(row, col));
+
+                let value = this.randGen.random(0, 1) < 0.9 ? 1 : 2
+                if (sum == 0) value = 1
+                this.matrix.set(row, col, value)
+                const gen = this.createOne(row, col, value)
+                this.items[this.matrix.index(row, col)] = gen
+                gen.style.opacity = 0
+                let it = gen.animate([
+                    { opacity: `0`, transform: `translate(${col}00%,${row}00%) scale(0)` },
+                    { opacity: `1`, transform: `translate(${col}00%,${row}00%) scale(1)` }
+                ], {
+                    delay: 100,
+                    duration: 200,
+                    fill: "forwards",
+                    easing: 'ease'
+                })
+            }
+        }
+        Game.prototype.create = function () {
+            for (let i = 0; i < this.matrix.row; i++)
+                for (let j = 0; j < this.matrix.col; j++) {
+                    const value = this.matrix.get(i, j)
+                    if (value && this.items[this.matrix.index(i, j)] == null) this.items[this.matrix.index(i, j)] = this.createOne(i, j, value)
+                }
+        }
+        Game.prototype.createOne = function (row, col, index) {
+            const board = document.querySelector('.board')
+            const grid = document.createElement('div')
+            const content = document.createElement('span')
+            grid.classList.add('grid')
+            grid.appendChild(content)
+            board.appendChild(grid)
+            content.innerHTML = gridStyle[index].text
+            content.style.fontSize = `${8 - (gridStyle[index].text.length - 1) * 1}vmin`
+            content.style.color = gridStyle[index].color
+            grid.style.backgroundColor = gridStyle[index].background
+            grid.style.transform = `translate(${col}00%,${row}00%)`
+            return grid
+        }
+        Game.prototype.clear = function (dir) {
+            document.querySelector('.board').innerHTML = ''
+            this.items = new Array(this.matrix.count).fill(null)
+        }
+        Game.prototype.control = function (dir) {
+            const varies = this.matrix.merge(dir)
+
+            for (let vary of varies) {
+                const last = this.matrix.get(vary.to.row, vary.to.col) == vary.value && vary.type == 1
+                const move = this.items[this.matrix.index(vary.from.row, vary.from.col)]
+                this.items[this.matrix.index(vary.from.row, vary.from.col)] = null
+                const goal = this.items[this.matrix.index(vary.to.row, vary.to.col)]
+                if (last) this.items[this.matrix.index(vary.to.row, vary.to.col)] = null
+                if (vary.type == 2) this.items[this.matrix.index(vary.to.row, vary.to.col)] = move
+                if (vary.type == 1) this.info.score.value += vary.value
+                let anime = move.animate([
+                    { transform: `translate(${vary.from.col}00%,${vary.from.row}00%)` },
+                    { transform: `translate(${vary.to.col}00%,${vary.to.row}00%)` }
+                ], { duration: 100, fill: "forwards", easing: 'ease-out' }
+                )
+
+                if (last) {
+                    const gen = this.createOne(vary.to.row, vary.to.col, vary.value)
+                    this.items[this.matrix.index(vary.to.row, vary.to.col)] = gen
+                    gen.style.opacity = 0
+                    let anime = gen.animate([
+                        { opacity: `0`, transform: `translate(${vary.to.col}00%,${vary.to.row}00%) scale(0)` },
+                        { opacity: `1`, transform: `translate(${vary.to.col}00%,${vary.to.row}00%) scale(1)` },
+                        { opacity: `1`, transform: `translate(${vary.to.col}00%,${vary.to.row}00%) scale(1.2)` },
+                        { opacity: `1`, transform: `translate(${vary.to.col}00%,${vary.to.row}00%) scale(1)` }
+                    ], {
+                        delay: 100,
+                        duration: 200,
+                        fill: "forwards",
+                        easing: 'ease'
+                    })
+                    anime.onfinish = function () {
+                        goal.parentNode.removeChild(goal)
+                    }
+                }
+
+                anime.onfinish = function () {
+                    if (vary.type == 1) {
+                        move.parentNode.removeChild(move)
+                    }
+                }.bind(this)
+            }
+            if (varies.length)
+                this.generate(1)
+        }
+
+        let game = new Game()
+
+        document.body.onkeydown = function (event) {
+            const e = event || window.event || arguments.callee.caller.arguments[0]
+            const key = e && e.keyCode
+            const oper = { 37: 3, 38: 1, 39: 4, 40: 2 }
+            if (key in oper) game.control(oper[key])
+        }
+        document.querySelector('.restart-button').onclick = function () {
+            game.restart()
+        }
+
+
+
+        let startx, starty, movex, movey, endx, endy, nx, ny, angle;    //定义变量，用于记录坐标和角度
+        let touchstartTime, isMove = false;
+
+        function touchs(event) { //开始触摸函数，event为触摸对象
+            event.preventDefault();     //阻止浏览器默认滚动事件
+            if (event.type == "touchstart") {     //通过if语句判断event.type执行了哪个触摸事件
+                isMove = false;     //获取开始的位置数组的第一个触摸位置
+                let touch = event.touches[0];
+                startx = Math.floor(touch.pageX);         //获取第一个坐标的X轴
+                starty = Math.floor(touch.pageY);         //获取第一个坐标的X轴
+            } else if (event.type == "touchmove") {    //触摸中的坐标获取
+                isMove = true;
+                let touch = event.touches[0];
+                movex = Math.floor(touch.pageX);
+                movey = Math.floor(touch.pageY);
+            } else if (event.type == "touchend" || event.type == "touchcancel") {  //当手指离开屏幕或系统取消触摸事件的时候
+                endx = Math.floor(event.changedTouches[0].pageX);         //获取最后的坐标位置
+                endy = Math.floor(event.changedTouches[0].pageY);
+                nx = endx - startx; //获取开始位置和离开位置的距离
+                ny = endy - starty;
+                angle = Math.atan2(ny, nx) * 180 / Math.PI;   //通过坐标计算角度公式 Math.atan2(y,x)*180/Math.PI
+                if (Math.abs(nx) <= 1 || Math.abs(ny) <= 1) {        //console.log('滑动距离太小');
+                    return false;
+                }
+                //通过滑动的角度判断触摸的方向
+                if (angle < 45 && angle >= -45) { //'右滑动'
+                    game.control(4);
+                    return false;
+                } else if (angle < 135 && angle >= 45) { //'下滑动'
+                    game.control(2);
+                    return false;
+                } else if ((angle <= 180 && angle >= 135) || (angle >= -180 && angle < -135)) { //'左滑动'
+                    game.control(3);
+                    return false;
+                } else if (angle <= -45 && angle >= -135) { //'上滑动'
+                    game.control(1);
+                    return false;
+                }
+            }
+        }
+
+        //添加触摸事件的监听，并直行自定义触摸函数
+        document.querySelector('.board').addEventListener('touchstart', touchs, false);
+        document.querySelector('.board').addEventListener('touchmove', touchs, false);
+        document.querySelector('.board').addEventListener('touchend', touchs, false);
+    </script>
+</body>
+
+</html>
