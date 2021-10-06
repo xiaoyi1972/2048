@@ -1,6 +1,6 @@
 <html>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--meta name="viewport" content="width=device-width, initial-scale=1.0"-->
 <title>2048</title>
 
 <head>
@@ -30,15 +30,6 @@
             border: 1vmin solid rgba(187, 173, 160, 1);
             border-radius: 2.5vmin;
             background: rgba(187, 173, 160, 1);
-            /*background-image:
-                linear-gradient(90deg,
-                    rgba(187, 173, 160, 1) 0vmin, rgba(187, 173, 160, 1) 1vmin, transparent 0vmin, transparent 18vmin,
-                    rgba(187, 173, 160, 1) 0vmin, rgba(187, 173, 160, 1) 19vmin),
-                linear-gradient(0deg,
-                    rgba(187, 173, 160, 1) 0vmin, rgba(187, 173, 160, 1) 1vmin,transparent 0vmin, transparent 18vmin,
-                    rgba(187, 173, 160, 1) 0vmin, rgba(187, 173, 160, 1) 19vmin);
-            background-size: 19vmin 19vmin;
-            background-position: 0vmin 0vmin;*/
             overflow: hidden;
             user-select: none;
         }
@@ -54,10 +45,7 @@
             position: absolute;
             width: 25%;
             height: 25%;
-            box-sizing: border-box;
-            border: 1vmin solid transparent;
-            background-clip: content-box;
-            border-radius: 2.5vmin;
+            clip-path: inset(1vmin 1vmin 1vmin 1vmin round 2.5vmin);
         }
 
         .grid span {
@@ -73,15 +61,13 @@
             position: relative;
             display: block;
             background: #bbada0;
-            padding: 1vmin 3vmin;
-            font-size: 2.7vmin;
-            min-width: 4vmin;
-            height: 5vmin;
-            line-height: 8.5vmin;
-            border-radius: 3px;
+            font-size: 3.5vmin;
+            min-width: 12vmin;
+            height: 11vmin;
+            line-height: 16vmin;
+            border-radius: 1vmin;
             color: white;
-            margin-top: 8px;
-            margin-left: 4px;
+            margin-left: 1vmin;
             text-align: center;
         }
 
@@ -92,24 +78,53 @@
             top: 1vmin;
             left: 0;
             text-transform: uppercase;
-            font-size: 2.7vmin;
-            line-height: 2vmin;
+            font-size: 3.5vmin;
+            line-height: 3vmin;
             text-align: center;
             color: #eee4da;
         }
 
-        /*.score-container:before{
+
+        .score {
             position: absolute;
-            content: '+300';
             width: 100%;
-            background-color: transparent;
-            font-size: 2.7vmin;
-            line-height: 3.5vmin;
-            text-align: center;
+            height: 100%;
             left: 0;
-            bottom: 0;
-            transition: all 0.55s ease-out;
-        }*/
+            top: 0;
+            text-align: center;
+            font-size: 3.5vmin;
+            line-height: 16vmin;
+        }
+
+        .addition {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            text-align: center;
+            color: rgba(119, 110, 101, 0.9);
+            font-size: 3.5vmin;
+            line-height: 16vmin;
+            transform: translateY(0%);
+            opacity: 0;
+        }
+
+        .fade-out {
+            animation: fadeOut 1200ms ease-in;
+        }
+
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: translateY(0%);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-100%);
+            }
+        }
 
         .score-container:after {
             content: '得分';
@@ -129,7 +144,7 @@
         }
 
         .title {
-            font-size: 8vmin;
+            font-size: 10vmin;
         }
 
         .game-intro {
@@ -183,11 +198,14 @@
 <body>
     <div class='container'>
         <div class="info">
-            <div style="display:flex;flex-direction: row;width:100%;">
+            <div style="display:flex;flex-direction: row;width:100%;align-items: center;">
                 <span class="title">2048</span>
                 <div style='flex:auto'></div>
                 <div style='display:flex;flex-direction: row;height:100%;align-items: center;'>
-                    <div class="score-container">0</div>
+                    <div class="score-container">
+                        <div class="score">0</div>
+                        <div class="addition"></div>
+                    </div>
                     <div class="best-container">0</div>
                 </div>
             </div>
@@ -286,12 +304,29 @@
             this.createBackground()
             this.generate()
             this.info = {
-                score: { element: document.querySelector('.score-container'), m_value: 0 },
+                score: {
+                    element: document.querySelector('.score'), m_value: 0, additionElement: document.querySelector('.addition'),
+                    animate: document.querySelector('.addition').animate([
+                        { opacity: `1`, transform: `translateY(0%)` },
+                        { opacity: `0`, transform: `translateY(-100%)` }
+                    ], {
+                        duration: 1200,
+                        fill: "forwards",
+                        easing: 'ease'
+                    })
+                },
                 best: { element: document.querySelector('.best-container'), m_value: 0 },
             }
             Object.defineProperty(this.info.score, "value", {
                 get: function () { return this.m_value; }.bind(this.info.score),
                 set: function (v) { this.element.innerHTML = this.m_value = v }.bind(this.info.score)
+            })
+            Object.defineProperty(this.info.score, "addition", {
+                set: function (v) {
+                    this.animate.cancel()
+                    this.additionElement.innerHTML = `+${v}`
+                    this.animate.play()
+                }.bind(this.info.score)
             })
             Object.defineProperty(this.info.best, "value", {
                 get: function () { return this.m_value; }.bind(this.info.best),
@@ -383,7 +418,7 @@
                 const goal = this.items[this.matrix.index(vary.to.row, vary.to.col)]
                 if (last) this.items[this.matrix.index(vary.to.row, vary.to.col)] = null
                 if (vary.type == 2) this.items[this.matrix.index(vary.to.row, vary.to.col)] = move
-                if (vary.type == 1) this.info.score.value += vary.value
+                if (vary.type == 1) { this.info.score.value += vary.value; this.info.score.addition = vary.value }
                 let anime = move.animate([
                     { transform: `translate(${vary.from.col}00%,${vary.from.row}00%)` },
                     { transform: `translate(${vary.to.col}00%,${vary.to.row}00%)` }
