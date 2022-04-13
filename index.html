@@ -27,18 +27,39 @@
             position: relative;
             width: 76vmin;
             height: 76vmin;
-            border: 1vmin solid rgba(187, 173, 160, 1);
+            padding: 1vmin solid rgba(187, 173, 160, 1);
             border-radius: 2.5vmin;
             background: rgba(187, 173, 160, 1);
             overflow: hidden;
             user-select: none;
         }
 
-        .grids .backs {
-            position: absolute;
+        .board .backs {
+            position: absolute !important;
             width: 100%;
             height: 100%;
             background-color: transparent;
+            box-sizing: border-box;
+            padding: 0;
+            border: 1vmin solid rgba(187, 173, 160, 1);
+            border-radius: 2.5vmin;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .board .grids {
+            position: absolute !important;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            box-sizing: border-box;
+            padding: 0;
+            border: 1vmin solid rgba(187, 173, 160, 1);
+            border-radius: 2.5vmin;
+            position: absolute;
+            left: 0;
+            top: 0;
         }
 
         .grid {
@@ -84,6 +105,30 @@
             color: #eee4da;
         }
 
+        .game-message {
+            display: flex;
+            position: absolute;
+            opacity: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: rgba(238, 228, 218, 0.73);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: opacity 800ms ease 400ms;
+        }
+
+        .game-message p {
+            margin: 0 0 .5em;
+            font-size: 60px;
+            font-weight: bold;
+            height: 60px;
+            line-height: 60px;
+        }
 
         .score {
             position: absolute;
@@ -110,28 +155,12 @@
             opacity: 0;
         }
 
-        .fade-out {
-            animation: fadeOut 1200ms ease-in;
-        }
-
-        @keyframes fadeOut {
-            0% {
-                opacity: 1;
-                transform: translateY(0%);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translateY(-100%);
-            }
-        }
-
         .score-container:after {
             content: '得分';
         }
 
         .best-container:after {
-            content: '最佳'''
+            content: '最佳';
         }
 
         .info {
@@ -152,16 +181,16 @@
             font-size: 2.4vmin;
         }
 
-        .restart-button {
+        .button {
             position: relative;
             background: #8f7a66;
-            border-radius: 3px;
-            padding: 0 3vmin;
+            border-radius: 1vmin;
+            padding: 1.2vmin 3vmin;
             text-decoration: none;
             color: #f9f6f2;
-            height: 5vmin;
-            line-height: 5vmin;
-            font-size: 2.2vmin;
+            line-height: 3vmin;
+            font-size: 2.6vmin;
+            font-weight: normal;
             cursor: pointer;
             display: block;
             text-align: center;
@@ -170,7 +199,12 @@
             user-select: none;
         }
 
-        .restart-button:after {
+        .button,
+        .restart {
+            margin-bottom: 1vmin;
+        }
+
+        .button:after {
             content: "";
             background: #fff;
             position: absolute;
@@ -184,10 +218,10 @@
             margin: auto;
             border-radius: 50%;
             transform: scale(1.5);
-            transition: all 0.55s ease-out;
+            transition: all 0.55s ease-in-out;
         }
 
-        .restart-button:active:after {
+        .button:active:after {
             transform: scale(0);
             opacity: 1;
             transition: 0s
@@ -213,7 +247,7 @@
                 <div class="game-intro">合并图块，达成 <strong>2048!</strong><br><a href="javascript:void(0)"
                         class="how-to-play-link">怎样玩 →</a></div>
                 <div style='flex:auto'></div>
-                <div class="restart-button">新游戏</div>
+                <a class="button restart">新游戏</a>
             </div>
         </div>
         <div class='board'>
@@ -265,6 +299,17 @@
         Matrix.prototype.index = function (row, col) { return row * this.col + col }
         Matrix.prototype.set = function (row, col, value) { this.data[this.index(row, col)] = value }
         Matrix.prototype.get = function (row, col, value) { return this.data[this.index(row, col)] }
+        Matrix.prototype.dead = function () {
+            for (let i = 0; i < this.row; i++) {
+                for (let j = 0; j < this.col; j++) {
+                    if ((j + 1 < this.col && this.data[this.index(i, j)] == this.data[this.index(i, j + 1)]) ||
+                        (i + 1 < this.row && this.data[this.index(i, j)] == this.data[this.index(i + 1, j)])) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
         Matrix.prototype.merge = function (dir = 4) {//1 up 2 down 3 left 4 right
             let arr = []
             const select = [1, -1][dir & 1], vertical = dir < 3, dis = vertical ? this.col : 1
@@ -301,7 +346,9 @@
             this.randGen = new Rand()
             this.matrix = new Matrix(4, 4)
             this.items = new Array(this.matrix.count).fill(null)
+            this.animes = new Set();
             this.createBackground()
+            this.createMessageWrap()
             this.generate()
             this.info = {
                 score: {
@@ -316,6 +363,7 @@
                     })
                 },
                 best: { element: document.querySelector('.best-container'), m_value: 0 },
+                message: { element: document.querySelector('.game-message') }
             }
             Object.defineProperty(this.info.score, "value", {
                 get: function () { return this.m_value; }.bind(this.info.score),
@@ -332,12 +380,16 @@
                 get: function () { return this.m_value; }.bind(this.info.best),
                 set: function (v) { this.element.innerHTML = this.m_value = v }.bind(this.info.best)
             })
+            Object.defineProperty(this.info.message, "value", {
+                set: function (v) { this.element.style.opacity = v ? 1 : 0 }.bind(this.info.message)
+            })
             this.update()
         }
         Game.prototype.update = function () {
             this.info.score.value = 0
         }
         Game.prototype.restart = function () {
+            this.info.message.value = false
             this.info.score.value = 0
             this.clear()
             this.randGen = new Rand()
@@ -374,6 +426,20 @@
                     easing: 'ease'
                 })
             }
+            if (this.matrix.row * this.matrix.col == sum + 1) {
+                //console.log('full', this.matrix.dead())
+                if (this.matrix.dead()) {
+                    this.info.message.value = true
+                    return;
+                }
+            }
+        }
+        Game.prototype.createMessageWrap = function () {
+            const board = document.querySelector('.board')
+            const wrapper = document.createElement('div')
+            wrapper.classList.add('game-message')
+            wrapper.innerHTML = `<p>游戏结束!</p><a class='button' onclick="game.restart()">重开</a>`
+            board.appendChild(wrapper);
         }
         Game.prototype.createBackground = function () {
             const board = document.querySelector('.backs')
@@ -409,8 +475,8 @@
             this.items = new Array(this.matrix.count).fill(null)
         }
         Game.prototype.control = function (dir) {
+            for (let item of this.animes) item.finish();
             const varies = this.matrix.merge(dir)
-
             for (let vary of varies) {
                 const last = this.matrix.get(vary.to.row, vary.to.col) == vary.value && vary.type == 1
                 const move = this.items[this.matrix.index(vary.from.row, vary.from.col)]
@@ -424,6 +490,7 @@
                     { transform: `translate(${vary.to.col}00%,${vary.to.row}00%)` }
                 ], { duration: 100, fill: "forwards", easing: 'ease-out' }
                 )
+                this.animes.add(anime)
 
                 if (last) {
                     const gen = this.createOne(vary.to.row, vary.to.col, vary.value)
@@ -440,15 +507,16 @@
                         fill: "forwards",
                         easing: 'ease'
                     })
+                    this.animes.add(anime)
                     anime.onfinish = function () {
                         goal.parentNode.removeChild(goal)
-                    }
+                        this.animes.delete(anime);
+                    }.bind(this)
                 }
 
                 anime.onfinish = function () {
-                    if (vary.type == 1) {
-                        move.parentNode.removeChild(move)
-                    }
+                    if (vary.type == 1) move.parentNode.removeChild(move)
+                    this.animes.delete(anime);
                 }.bind(this)
             }
             if (varies.length)
@@ -463,7 +531,7 @@
             const oper = { 37: 3, 38: 1, 39: 4, 40: 2 }
             if (key in oper) game.control(oper[key])
         }
-        document.querySelector('.restart-button').onclick = function () {
+        document.querySelector('.restart').onclick = function () {
             game.restart()
         }
 
