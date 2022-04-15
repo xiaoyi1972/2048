@@ -1,6 +1,6 @@
 <html>
 <meta charset="UTF-8">
-<!--meta name="viewport" content="width=device-width, initial-scale=1.0"-->
+<!--meta name="viewport" content="width=device-width, initial-scale=1"-->
 <title>2048</title>
 
 <head>
@@ -14,16 +14,14 @@
             display: flex;
             flex-direction: column;
             position: absolute;
-            width: calc(76+2)vmin;
-            /*height: 90vmin;*/
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
             align-items: center;
         }
 
-
         .board {
+            touch-action: none;
             position: relative;
             width: 76vmin;
             height: 76vmin;
@@ -32,6 +30,72 @@
             background: rgba(187, 173, 160, 1);
             overflow: hidden;
             user-select: none;
+            margin-top: 1vmin;
+        }
+
+        @media all and (orientation: landscape) {
+            /*body:after {
+                content: "width is greater than height"
+            }*/
+        }
+
+        @media all and (orientation: portrait) {
+            /*body:after {
+                content: "height is greater than width"
+            }*/
+
+            .score-container,
+            .best-container {
+                height: 13vmin !important;
+                line-height: 20vmin !important;
+                border-radius: 1vmin !important;
+                margin-left: 1vmin !important;
+                padding: 0vmin 5vmin 0vmin 5vmin !important;
+                font-size: 4.5vmin !important;
+            }
+
+            .score-container:after,
+            .best-container:after {
+                top: 1vmin !important;
+                font-size: 4.5vmin !important;
+                line-height: 5vmin !important;
+            }
+
+            .game-message p {
+                margin: 0 0 .5em !important;
+                font-size: 11vmin !important;
+                line-height: 8vmin !important;
+            }
+
+            .lower .game-continue {
+                margin-right: 5vmin !important;
+            }
+
+            .addition {
+                font-size: 3.5vmin !important;
+                line-height: 16vmin !important;
+            }
+
+            .title {
+                font-size: 15vmin !important;
+            }
+
+            .game-intro {
+                font-size: 4vmin !important;
+            }
+
+            .board {
+                width: 80vmin !important;
+                height: 80vmin !important;
+            }
+
+            .button {
+                border-radius: 1vmin !important;
+                padding: 2vmin 3vmin !important;
+                line-height: 3vmin !important;
+                font-size: 4vmin !important;
+            }
+
         }
 
         .board .backs {
@@ -69,6 +133,34 @@
             clip-path: inset(1vmin 1vmin 1vmin 1vmin round 2.5vmin);
         }
 
+        .grid-2 {
+            box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0), inset 0 0 0 1px rgba(255, 255, 255, 0);
+        }
+
+        .grid-4 {
+            box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0), inset 0 0 0 1px rgba(255, 255, 255, 0);
+        }
+
+        .grid-128 {
+            box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.2381), inset 0 0 0 1px rgba(255, 255, 255, 0.14286);
+        }
+
+        .grid-256 {
+            box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.31746), inset 0 0 0 1px rgba(255, 255, 255, 0.19048);
+        }
+
+        .grid-512 {
+            box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.39683), inset 0 0 0 1px rgba(255, 255, 255, 0.2381);
+        }
+
+        .grid-1024 {
+            box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.47619), inset 0 0 0 1px rgba(255, 255, 255, 0.28571);
+        }
+
+        .grid-2048 {
+            box-shadow: 0 0 30px 10px rgba(243, 215, 116, 0.55556), inset 0 0 0 1px rgba(255, 255, 255, 0.33333);
+        }
+
         .grid span {
             position: absolute;
             left: 50%;
@@ -82,14 +174,14 @@
             position: relative;
             display: block;
             background: #bbada0;
-            font-size: 3.5vmin;
-            min-width: 12vmin;
             height: 11vmin;
             line-height: 16vmin;
             border-radius: 1vmin;
             color: white;
             margin-left: 1vmin;
+            padding: 0vmin 5vmin 0vmin 5vmin;
             text-align: center;
+            font-size: 3.5vmin;
         }
 
         .score-container:after,
@@ -113,8 +205,7 @@
             right: 0;
             bottom: 0;
             left: 0;
-            background: rgba(238, 228, 218, 0.73);
-            z-index: 100;
+            z-index: -1;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -122,23 +213,51 @@
             transition: opacity 800ms ease 400ms;
         }
 
-        .game-message p {
-            margin: 0 0 .5em;
-            font-size: 60px;
-            font-weight: bold;
-            height: 60px;
-            line-height: 60px;
+        .game-interrupt {
+            display: flex !important;
         }
 
-        .score {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            left: 0;
-            top: 0;
-            text-align: center;
-            font-size: 3.5vmin;
-            line-height: 16vmin;
+        .game-message .lower .game-continue {
+            display: none;
+        }
+
+        .game-won .lower .game-continue {
+            display: block !important;
+        }
+
+        .game-message,
+        .instant {
+            transition: opacity 800ms ease 0ms !important;
+        }
+
+        .game-failed {
+            background: rgba(238, 228, 218, 0.73) !important;
+            color: black !important;
+            z-index: 100 !important;
+            opacity: 1 !important;
+        }
+
+        .game-won {
+            background: rgba(237, 194, 46, 0.5) !important;
+            color: #f9f6f2 !important;
+            z-index: 100 !important;
+            opacity: 1 !important;
+        }
+
+        .game-message p {
+            margin: 0 0 .5em;
+            font-size: 11vmin;
+            font-weight: bold;
+            line-height: 8vmin;
+        }
+
+        .game-message .lower {
+            display: block;
+        }
+
+        .lower .game-continue {
+            float: left;
+            margin-right: 5vmin;
         }
 
         .addition {
@@ -153,6 +272,19 @@
             line-height: 16vmin;
             transform: translateY(0%);
             opacity: 0;
+            animation: rise 1200ms ease-out;
+        }
+
+        @keyframes rise {
+            0% {
+                opacity: 1;
+                transform: translateY(0%);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-100%);
+            }
         }
 
         .score-container:after {
@@ -199,11 +331,6 @@
             user-select: none;
         }
 
-        .button,
-        .restart {
-            margin-bottom: 1vmin;
-        }
-
         .button:after {
             content: "";
             background: #fff;
@@ -218,7 +345,7 @@
             margin: auto;
             border-radius: 50%;
             transform: scale(1.5);
-            transition: all 0.55s ease-in-out;
+            transition: all 0.55s ease;
         }
 
         .button:active:after {
@@ -237,7 +364,7 @@
                 <div style='flex:auto'></div>
                 <div style='display:flex;flex-direction: row;height:100%;align-items: center;'>
                     <div class="score-container">
-                        <div class="score">0</div>
+                        0
                         <div class="addition"></div>
                     </div>
                     <div class="best-container">0</div>
@@ -346,51 +473,92 @@
             this.randGen = new Rand()
             this.matrix = new Matrix(4, 4)
             this.items = new Array(this.matrix.count).fill(null)
-            this.animes = new Set();
+            this.animes = new Set()
             this.createBackground()
             this.createMessageWrap()
-            this.generate()
-            this.info = {
-                score: {
-                    element: document.querySelector('.score'), m_value: 0, additionElement: document.querySelector('.addition'),
-                    animate: document.querySelector('.addition').animate([
-                        { opacity: `1`, transform: `translateY(0%)` },
-                        { opacity: `0`, transform: `translateY(-100%)` }
-                    ], {
-                        duration: 1200,
-                        fill: "forwards",
-                        easing: 'ease'
-                    })
-                },
-                best: { element: document.querySelector('.best-container'), m_value: 0 },
-                message: { element: document.querySelector('.game-message') }
+            this.won = {
+                value: false, upon: 11,
+                trigger: function () {
+                    this.won.value = true
+                    this.info.message.won()
+                }.bind(this)
             }
+            this.info = {
+                score: { element: document.querySelector('.score-container'), m_value: 0 },
+                best: { element: document.querySelector('.best-container'), m_value: 0, load: function () { this.info.best.value = localStorage.getItem('best') || 0 }.bind(this) },
+                message: {
+                    element: document.querySelector('.game-message'),
+                    tag: document.querySelector('.game-message > p'),
+                }
+            }
+            this.info.best.load()
             Object.defineProperty(this.info.score, "value", {
                 get: function () { return this.m_value; }.bind(this.info.score),
-                set: function (v) { this.element.innerHTML = this.m_value = v }.bind(this.info.score)
+                set: function (v) { this.element.textContent = this.m_value = v }.bind(this.info.score)
             })
             Object.defineProperty(this.info.score, "addition", {
                 set: function (v) {
-                    this.animate.cancel()
-                    this.additionElement.innerHTML = `+${v}`
-                    this.animate.play()
+                    const addition = document.createElement("div")
+                    addition.innerHTML = `+${v}`
+                    addition.classList.add('addition')
+                    this.element.appendChild(addition)
                 }.bind(this.info.score)
             })
             Object.defineProperty(this.info.best, "value", {
                 get: function () { return this.m_value; }.bind(this.info.best),
-                set: function (v) { this.element.innerHTML = this.m_value = v }.bind(this.info.best)
+                set: function (v) {
+                    this.element.innerHTML = this.m_value = v
+                    localStorage.setItem('best', this.m_value)
+                }.bind(this.info.best)
             })
-            Object.defineProperty(this.info.message, "value", {
-                set: function (v) { this.element.style.opacity = v ? 1 : 0 }.bind(this.info.message)
+            Object.defineProperties(this.info.message, {
+                value: {
+                    set: function (v) {
+                        this.message.m_value = v;
+                        if (this.best.value < this.score.value) this.best.value = this.score.value
+                    }.bind(this.info),
+                    get: function () { return this.m_value }.bind(this.info.message)
+                },
+                msg: { set: function (v) { this.tag.innerHTML = v }.bind(this.info.message) },
+                won: {
+                    value: function () {
+                        this.value = true
+                        this.element.classList.remove('instant')
+                        this.element.classList.remove('game-failed')
+                        this.element.classList.add('game-won')
+                        this.msg = '游戏胜利!'
+                    }.bind(this.info.message)
+                },
+                lose: {
+                    value: function () {
+                        this.value = true
+                        this.element.classList.remove('instant')
+                        this.element.classList.remove('game-won')
+                        this.element.classList.add('game-failed')
+                        this.msg = '游戏结束!'
+                    }.bind(this.info.message)
+                },
+                hide: {
+                    value: function () {
+                        this.element.classList.remove('game-failed')
+                        this.element.classList.remove('game-won')
+                        this.element.classList.add('instant')
+                        this.value = false;
+                    }.bind(this.info.message)
+                }
             })
-            this.update()
-        }
-        Game.prototype.update = function () {
-            this.info.score.value = 0
+            this.info.message.element.addEventListener("transitionend", function () {
+                if (!this.value) {
+                    this.element.classList.remove('game-failed')
+                    this.element.classList.remove('game-won')
+                }
+            }.bind(this.info.message), false);
+            this.restart()
         }
         Game.prototype.restart = function () {
-            this.info.message.value = false
+            this.info.message.hide()
             this.info.score.value = 0
+            this.won.value = false
             this.clear()
             this.randGen = new Rand()
             this.matrix = new Matrix(4, 4)
@@ -427,9 +595,8 @@
                 })
             }
             if (this.matrix.row * this.matrix.col == sum + 1) {
-                //console.log('full', this.matrix.dead())
                 if (this.matrix.dead()) {
-                    this.info.message.value = true
+                    this.info.message.lose()
                     return;
                 }
             }
@@ -438,7 +605,8 @@
             const board = document.querySelector('.board')
             const wrapper = document.createElement('div')
             wrapper.classList.add('game-message')
-            wrapper.innerHTML = `<p>游戏结束!</p><a class='button' onclick="game.restart()">重开</a>`
+            wrapper.innerHTML = `<p></p><div class='lower'><a class='button game-continue' onclick="game.info.message.hide()">继续</a>
+                <a class='button' onclick="game.restart()">重开</a></div>`
             board.appendChild(wrapper);
         }
         Game.prototype.createBackground = function () {
@@ -463,7 +631,8 @@
             grid.classList.add('grid')
             grid.appendChild(content)
             board.appendChild(grid)
-            content.innerHTML = gridStyle[index].text
+            content.innerHTML = index > 11 ? Math.pow(2, index) : gridStyle[index].text;
+            index = Math.min(index, 11)
             content.style.fontSize = `${8 - (gridStyle[index].text.length - 1) * 1}vmin`
             content.style.color = gridStyle[index].color
             grid.style.backgroundColor = gridStyle[index].background
@@ -475,7 +644,8 @@
             this.items = new Array(this.matrix.count).fill(null)
         }
         Game.prototype.control = function (dir) {
-            for (let item of this.animes) item.finish();
+            if (this.info.message.value) return
+            for (let item of this.animes) item.finish()
             const varies = this.matrix.merge(dir)
             for (let vary of varies) {
                 const last = this.matrix.get(vary.to.row, vary.to.col) == vary.value && vary.type == 1
@@ -488,12 +658,13 @@
                 let anime = move.animate([
                     { transform: `translate(${vary.from.col}00%,${vary.from.row}00%)` },
                     { transform: `translate(${vary.to.col}00%,${vary.to.row}00%)` }
-                ], { duration: 100, fill: "forwards", easing: 'ease-out' }
+                ], { duration: 150, fill: "forwards", easing: 'ease' }
                 )
                 this.animes.add(anime)
 
                 if (last) {
                     const gen = this.createOne(vary.to.row, vary.to.col, vary.value)
+                    if (vary.value == this.won.upon && !this.won.value) this.won.trigger()
                     this.items[this.matrix.index(vary.to.row, vary.to.col)] = gen
                     gen.style.opacity = 0
                     let anime = gen.animate([
@@ -502,7 +673,7 @@
                         { opacity: `1`, transform: `translate(${vary.to.col}00%,${vary.to.row}00%) scale(1.2)` },
                         { opacity: `1`, transform: `translate(${vary.to.col}00%,${vary.to.row}00%) scale(1)` }
                     ], {
-                        delay: 100,
+                        delay: 150,
                         duration: 200,
                         fill: "forwards",
                         easing: 'ease'
@@ -535,48 +706,47 @@
             game.restart()
         }
 
-
-
-        let startx, starty, movex, movey, endx, endy, nx, ny, angle;    //定义变量，用于记录坐标和角度
-        let touchstartTime, isMove = false;
-
-        function touchs(event) { //开始触摸函数，event为触摸对象
-            event.preventDefault();     //阻止浏览器默认滚动事件
-            if (event.type == "touchstart") {     //通过if语句判断event.type执行了哪个触摸事件
-                isMove = false;     //获取开始的位置数组的第一个触摸位置
-                let touch = event.touches[0];
-                startx = Math.floor(touch.pageX);         //获取第一个坐标的X轴
-                starty = Math.floor(touch.pageY);         //获取第一个坐标的X轴
-            } else if (event.type == "touchmove") {    //触摸中的坐标获取
-                isMove = true;
-                let touch = event.touches[0];
-                movex = Math.floor(touch.pageX);
-                movey = Math.floor(touch.pageY);
-            } else if (event.type == "touchend" || event.type == "touchcancel") {  //当手指离开屏幕或系统取消触摸事件的时候
-                endx = Math.floor(event.changedTouches[0].pageX);         //获取最后的坐标位置
-                endy = Math.floor(event.changedTouches[0].pageY);
-                nx = endx - startx; //获取开始位置和离开位置的距离
-                ny = endy - starty;
-                angle = Math.atan2(ny, nx) * 180 / Math.PI;   //通过坐标计算角度公式 Math.atan2(y,x)*180/Math.PI
-                /*if (Math.abs(nx) <= 1 || Math.abs(ny) <= 1) {        //console.log('滑动距离太小');
-                    return false;
-                }*/
-                //通过滑动的角度判断触摸的方向
-                if (angle < 45 && angle >= -45) { //'右滑动'
-                    game.control(4);
-                    return false;
-                } else if (angle < 135 && angle >= 45) { //'下滑动'
-                    game.control(2);
-                    return false;
-                } else if ((angle <= 180 && angle >= 135) || (angle >= -180 && angle < -135)) { //'左滑动'
-                    game.control(3);
-                    return false;
-                } else if (angle <= -45 && angle >= -135) { //'上滑动'
-                    game.control(1);
-                    return false;
+        let touchs = (function () {
+            let startx, starty, movex, movey, endx, endy, nx, ny, angle;    //定义变量，用于记录坐标和角度
+            let touchstartTime, isMove = false;
+            return function (event) { //开始触摸函数，event为触摸对象
+                // event.preventDefault();     //阻止浏览器默认滚动事件
+                if (event.type == "touchstart") {     //通过if语句判断event.type执行了哪个触摸事件
+                    isMove = false;     //获取开始的位置数组的第一个触摸位置
+                    let touch = event.touches[0];
+                    startx = Math.floor(touch.pageX);         //获取第一个坐标的X轴
+                    starty = Math.floor(touch.pageY);         //获取第一个坐标的X轴
+                } else if (event.type == "touchmove") {    //触摸中的坐标获取
+                    isMove = true;
+                    let touch = event.touches[0];
+                    movex = Math.floor(touch.pageX);
+                    movey = Math.floor(touch.pageY);
+                } else if (event.type == "touchend" || event.type == "touchcancel") {  //当手指离开屏幕或系统取消触摸事件的时候
+                    endx = Math.floor(event.changedTouches[0].pageX);         //获取最后的坐标位置
+                    endy = Math.floor(event.changedTouches[0].pageY);
+                    nx = endx - startx; //获取开始位置和离开位置的距离
+                    ny = endy - starty;
+                    angle = Math.atan2(ny, nx) * 180 / Math.PI;   //通过坐标计算角度公式 Math.atan2(y,x)*180/Math.PI
+                    if (Math.abs(nx) == 0 || Math.abs(ny) == 0) {        //console.log('滑动距离太小');
+                        return false;
+                    }
+                    //通过滑动的角度判断触摸的方向
+                    if (angle < 45 && angle >= -45) { //'右滑动'
+                        game.control(4);
+                        return false;
+                    } else if (angle < 135 && angle >= 45) { //'下滑动'
+                        game.control(2);
+                        return false;
+                    } else if ((angle <= 180 && angle >= 135) || (angle >= -180 && angle < -135)) { //'左滑动'
+                        game.control(3);
+                        return false;
+                    } else if (angle <= -45 && angle >= -135) { //'上滑动'
+                        game.control(1);
+                        return false;
+                    }
                 }
             }
-        }
+        })()
 
         //添加触摸事件的监听，并直行自定义触摸函数
         document.querySelector('.board').addEventListener('touchstart', touchs, false);
